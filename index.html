@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CIST 검사</title>
+    <title>CIST Web Implementation</title>
     <style>
         * {
             margin: 0;
@@ -221,34 +221,34 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>CIST 검사</h1>
-            <p>음성으로 하는 종합 인지 기능 검사</p>
+            <h1>CIST Web Implementation</h1>
+            <p>Complete Cognitive Assessment Test</p>
         </div>
         
         <div class="content">
             <div class="warning">
-                <strong>아래에 API키와 검사용 음성 파일 경로를 설정해주세요.</strong>
+                <strong>⚠️ Setup Required:</strong> This implementation requires your OpenAI API key and audio files to be hosted online.
             </div>
             
             <div class="setup-section">
-                <h3>설정</h3>
+                <h3>🔧 Configuration</h3>
                 <div class="input-group">
                     <label for="openaiKey">OpenAI API Key:</label>
                     <input type="password" id="openaiKey" placeholder="sk-...">
                 </div>
                 <div class="input-group">
-                    <label for="audioBaseUrl">검사용 음성 파일 경로:</label>
+                    <label for="audioBaseUrl">Audio Files Base URL:</label>
                     <input type="url" id="audioBaseUrl" placeholder="https://your-domain.com/audio/" value="./audio/">
                 </div>
             </div>
             
             <button class="start-button" onclick="initializeTest()" id="initBtn">
-                검사 시작
+                Initialize Test
             </button>
             
             <div class="test-area" id="testArea">
                 <div class="progress-info" id="progressInfo">
-                    문제 <span id="currentQ">1</span> of <span id="totalQ">11</span>
+                    Question <span id="currentQ">1</span> of <span id="totalQ">11</span>
                 </div>
                 
                 <div class="current-question" id="questionArea">
@@ -256,18 +256,18 @@
                     
                     <div class="audio-controls">
                         <button class="audio-button" onclick="playCurrentAudio()" id="playBtn">
-                            🔊 문제 재생
+                            🔊 Play Question
                         </button>
                         <button class="audio-button" onclick="startRecording()" id="recordBtn">
-                            🎤 녹음 시작
+                            🎤 Start Recording
                         </button>
                         <button class="audio-button" onclick="stopRecording()" id="stopBtn" disabled>
-                            ⏹️ 녹음 중지
+                            ⏹️ Stop Recording
                         </button>
                     </div>
                     
                     <div class="recording-indicator" id="recordingIndicator">
-                        🔴 녹음 중입니다. 답변을 말씀해주세요.
+                        🔴 Recording... Speak your answer
                     </div>
                     
                     <div class="response-area" id="responseArea">
@@ -275,24 +275,24 @@
                     </div>
                     
                     <div class="evaluation-result" id="evaluationResult" style="display: none;">
-                        <strong>평가 결과:</strong> <span id="evaluationText"></span>
+                        <strong>Evaluation:</strong> <span id="evaluationText"></span>
                     </div>
                     
                     <button class="audio-button" onclick="nextQuestion()" id="nextBtn" style="display: none;">
-                        다음 문제
+                        Next Question →
                     </button>
                 </div>
             </div>
             
             <div class="final-result" id="finalResult">
                 <div class="final-score" id="finalScore"></div>
-                <div>최종 검사 결과</div>
+                <div>Final Test Result</div>
             </div>
         </div>
     </div>
 
     <script>
-        // Test script data
+        // Test script data (same as your Python script)
         const script = [
             {
                 label: 'hello',
@@ -369,22 +369,7 @@
                 content: '지금부터 제가 그만이라고 말할 때까지 과일이나 채소를 최대한 많이 이야기해주세요.',
                 answer: '과일이나 채소를 0-8개: 0점 / 9-14개: 1점 / 15개 이상: 2점',
                 hasAnswer: true
-            },
-            {
-        'label': 'Q7_stop',
-        'file': 'ddolit_CIST_Q_Q7_stop.wav',
-        'content': '그만.',
-    },
-    {
-        'label': 'Q_end',
-        'file': 'ddolit_CIST_Q_end.wav',
-        'content': '검사가 모두 끝났어요. 결과는 또릿에서 확인하실 수 있습니다.',
-    },
-    {
-        'label': 'call_end',
-        'file': 'ddolit_CIST_Q_call_end.wav',
-        'content': '통화가 종료됩니다.',
-    }
+            }
         ];
 
         let currentQuestionIndex = 0;
