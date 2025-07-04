@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CIST Web Implementation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Malgun Gothic', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .setup-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .setup-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: #4facfe;
+        }
+        
+        .start-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: block;
+            margin: 20px auto;
+            font-weight: 600;
+        }
+        
+        .start-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        
+        .start-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .test-area {
+            display: none;
+            text-align: center;
+        }
+        
+        .current-question {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border-left: 5px solid #4facfe;
+        }
+        
+        .question-text {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        
+        .audio-controls {
+            margin: 20px 0;
+        }
+        
+        .audio-button {
+            background: #4facfe;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            margin: 0 10px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+        
+        .audio-button:hover:not(:disabled) {
+            background: #2196F3;
+            transform: translateY(-1px);
+        }
+        
+        .audio-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .recording-indicator {
+            display: none;
+            color: #e74c3c;
+            font-size: 1.1em;
+            margin: 15px 0;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .response-area {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            min-height: 60px;
+        }
+        
+        .response-text {
+            color: #1976d2;
+            font-style: italic;
+        }
+        
+        .evaluation-result {
+            background: #f1f8e9;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border-left: 4px solid #4caf50;
+        }
+        
+        .progress-info {
+            background: #fff3e0;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .final-result {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .final-score {
+            font-size: 3em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>CIST Web Implementation</h1>
+            <p>Complete Cognitive Assessment Test</p>
+        </div>
+        
+        <div class="content">
+            <div class="warning">
+                <strong>⚠️ Setup Required:</strong> This implementation requires your OpenAI API key and audio files to be hosted online.
+            </div>
+            
+            <div class="setup-section">
+                <h3>🔧 Configuration</h3>
+                <div class="input-group">
+                    <label for="openaiKey">OpenAI API Key:</label>
+                    <input type="password" id="openaiKey" placeholder="sk-...">
+                </div>
+                <div class="input-group">
+                    <label for="audioBaseUrl">Audio Files Base URL:</label>
+                    <input type="url" id="audioBaseUrl" placeholder="https://your-domain.com/audio/" value="./audio/">
+                </div>
+            </div>
+            
+            <button class="start-button" onclick="initializeTest()" id="initBtn">
+                Initialize Test
+            </button>
+            
+            <div class="test-area" id="testArea">
+                <div class="progress-info" id="progressInfo">
+                    Question <span id="currentQ">1</span> of <span id="totalQ">11</span>
+                </div>
+                
+                <div class="current-question" id="questionArea">
+                    <div class="question-text" id="questionText"></div>
+                    
+                    <div class="audio-controls">
+                        <button class="audio-button" onclick="playCurrentAudio()" id="playBtn">
+                            🔊 Play Question
+                        </button>
+                        <button class="audio-button" onclick="startRecording()" id="recordBtn">
+                            🎤 Start Recording
+                        </button>
+                        <button class="audio-button" onclick="stopRecording()" id="stopBtn" disabled>
+                            ⏹️ Stop Recording
+                        </button>
+                    </div>
+                    
+                    <div class="recording-indicator" id="recordingIndicator">
+                        🔴 Recording... Speak your answer
+                    </div>
+                    
+                    <div class="response-area" id="responseArea">
+                        <div class="response-text" id="responseText">Your response will appear here...</div>
+                    </div>
+                    
+                    <div class="evaluation-result" id="evaluationResult" style="display: none;">
+                        <strong>Evaluation:</strong> <span id="evaluationText"></span>
+                    </div>
+                    
+                    <button class="audio-button" onclick="nextQuestion()" id="nextBtn" style="display: none;">
+                        Next Question →
+                    </button>
+                </div>
+            </div>
+            
+            <div class="final-result" id="finalResult">
+                <div class="final-score" id="finalScore"></div>
+                <div>Final Test Result</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Test script data (same as your Python script)
+        const script = [
+            {
+                label: 'hello',
+                file: 'ddolit_CIST_Q_hello.wav',
+                content: '안녕하세요. 지금부터, 기억력과 사고능력을 살펴보기 위한, 질문들을 드릴거에요.',
+                hasAnswer: false
+            },
+            {
+                label: 'Q1_2',
+                file: 'ddolit_CIST_Q_Q1_2.wav',
+                content: '올해는 몇 년도인가요',
+                answer: `${new Date().getFullYear()}년`,
+                hasAnswer: true
+            },
+            {
+                label: 'Q1_3',
+                file: 'ddolit_CIST_Q_Q1_3.wav',
+                content: '지금은 몇 월인가요?',
+                answer: `${new Date().getMonth() + 1}월`,
+                hasAnswer: true
+            },
+            {
+                label: 'Q1_4',
+                file: 'ddolit_CIST_Q_Q1_4.wav',
+                content: '오늘은 며칠인가요?',
+                answer: `${new Date().getDate()}일`,
+                hasAnswer: true
+            },
+            {
+                label: 'Q2',
+                file: 'ddolit_CIST_Q_Q2.wav',
+                content: '지금 계신 곳은 어디인가요? 어디에 계신지 말씀해 주세요.',
+                answer: '집, 병원, 서울시, 경기도, 강남구 등 사람이 거주하거나 머무를 수 있는 장소',
+                hasAnswer: true
+            },
+            {
+                label: 'Q3',
+                file: 'ddolit_CIST_Q_Q3.wav',
+                content: '지금부터 외우셔야 하는 문장을 불러드릴게요. 끝까지 잘 들어주시고, 따라해주세요. 민수는 자전거를 타고 공원에 가서 열한시부터 야구를 했다',
+                answer: '민수는 자전거를 타고 공원에 가서 11시부터 야구를 했다',
+                hasAnswer: true
+            },
+            {
+                label: 'Q4_1',
+                file: 'ddolit_CIST_Q_Q4_1.wav',
+                content: '제가 불러드리는 숫자를, 그대로 따라해주세요. 육, 구, 칠, 삼',
+                answer: '6973',
+                hasAnswer: true
+            },
+            {
+                label: 'Q4_2',
+                file: 'ddolit_CIST_Q_Q4_2.wav',
+                content: '오, 칠, 이, 팔, 사',
+                answer: '57284',
+                hasAnswer: true
+            },
+            {
+                label: 'Q5',
+                file: 'ddolit_CIST_Q_Q5.wav',
+                content: '제가 불러드리는 말을, 끝에서부터, 거꾸로 따라해주세요. 금수강산',
+                answer: '산강수금',
+                hasAnswer: true
+            },
+            {
+                label: 'Q6',
+                file: 'ddolit_CIST_Q_Q6.wav',
+                content: '제가 조금 전에 외우라고 불러드렸던 문장을 다시 한번 말씀해주세요.',
+                answer: '민수는 자전거를 타고 공원에 가서 열한시부터 야구를 했다',
+                hasAnswer: true
+            },
+            {
+                label: 'Q7',
+                file: 'ddolit_CIST_Q_Q7.wav',
+                content: '지금부터 제가 그만이라고 말할 때까지 과일이나 채소를 최대한 많이 이야기해주세요.',
+                answer: '과일이나 채소를 0-8개: 0점 / 9-14개: 1점 / 15개 이상: 2점',
+                hasAnswer: true
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let correctCount = 0;
+        let totalCount = 0;
+        let mediaRecorder;
+        let audioChunks = [];
+        let currentAudio;
+        let openaiApiKey = '';
+        let audioBaseUrl = '';
+
+        // Web Speech API for STT
+        let recognition;
+        if ('webkitSpeechRecognition' in window) {
+            recognition = new webkitSpeechRecognition();
+        } else if ('SpeechRecognition' in window) {
+            recognition = new SpeechRecognition();
+        }
+
+        if (recognition) {
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = 'ko-KR';
+        }
+
+        async function initializeTest() {
+            openaiApiKey = document.getElementById('openaiKey').value.trim();
+            audioBaseUrl = document.getElementById('audioBaseUrl').value.trim();
+
+            if (!openaiApiKey) {
+                alert('OpenAI API Key를 입력해주세요.');
+                return;
+            }
+
+            if (!recognition) {
+                alert('이 브라우저는 음성 인식을 지원하지 않습니다. Chrome을 사용해주세요.');
+                return;
+            }
+
+            // Request microphone permission
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                stream.getTracks().forEach(track => track.stop()); // Stop the stream, we just needed permission
+                
+                document.getElementById('initBtn').style.display = 'none';
+                document.getElementById('testArea').style.display = 'block';
+                
+                startTest();
+            } catch (error) {
+                alert('마이크 권한이 필요합니다. 브라우저에서 마이크 사용을 허용해주세요.');
+            }
+        }
+
+        function startTest() {
+            currentQuestionIndex = 0;
+            correctCount = 0;
+            totalCount = 0;
+            showCurrentQuestion();
+        }
+
+        function showCurrentQuestion() {
+            if (currentQuestionIndex >= script.length) {
+                showFinalResult();
+                return;
+            }
+
+            const question = script[currentQuestionIndex];
+            
+            document.getElementById('currentQ').textContent = currentQuestionIndex + 1;
+            document.getElementById('totalQ').textContent = script.length;
+            document.getElementById('questionText').textContent = `[${question.label}] ${question.content}`;
+            document.getElementById('responseText').textContent = 'Your response will appear here...';
+            document.getElementById('evaluationResult').style.display = 'none';
+            document.getElementById('nextBtn').style.display = 'none';
+            
+            // Reset buttons
+            document.getElementById('recordBtn').disabled = false;
+            document.getElementById('stopBtn').disabled = true;
+        }
+
+        async function playCurrentAudio() {
+            const question = script[currentQuestionIndex];
+            const audioUrl = audioBaseUrl + question.file;
+            
+            try {
+                if (currentAudio) {
+                    currentAudio.pause();
+                }
+                
+                currentAudio = new Audio(audioUrl);
+                await currentAudio.play();
+            } catch (error) {
+                console.error('Audio playback failed:', error);
+                alert('오디오 파일을 재생할 수 없습니다. 파일 경로를 확인해주세요.');
+            }
+        }
+
+        function startRecording() {
+            if (!recognition) return;
+
+            document.getElementById('recordBtn').disabled = true;
+            document.getElementById('stopBtn').disabled = false;
+            document.getElementById('recordingIndicator').style.display = 'block';
+            document.getElementById('responseText').textContent = 'Listening...';
+
+            recognition.onresult = function(event) {
+                const transcript = event.results[0][0].transcript;
+                document.getElementById('responseText').textContent = transcript;
+                
+                if (script[currentQuestionIndex].hasAnswer) {
+                    evaluateAnswer(transcript);
+                } else {
+                    document.getElementById('nextBtn').style.display = 'inline-block';
+                }
+            };
+
+            recognition.onerror = function(event) {
+                console.error('Speech recognition error:', event.error);
+                document.getElementById('responseText').textContent = 'Speech recognition error. Please try again.';
+                resetRecordingButtons();
+            };
+
+            recognition.onend = function() {
+                resetRecordingButtons();
+            };
+
+            recognition.start();
+        }
+
+        function stopRecording() {
+            if (recognition) {
+                recognition.stop();
+            }
+            resetRecordingButtons();
+        }
+
+        function resetRecordingButtons() {
+            document.getElementById('recordBtn').disabled = false;
+            document.getElementById('stopBtn').disabled = true;
+            document.getElementById('recordingIndicator').style.display = 'none';
+        }
+
+        async function evaluateAnswer(userResponse) {
+            const question = script[currentQuestionIndex];
+            
+            try {
+                const evaluation = await callOpenAI(question.content, userResponse, question.answer);
+                
+                document.getElementById('evaluationText').textContent = evaluation;
+                document.getElementById('evaluationResult').style.display = 'block';
+                
+                totalCount++;
+                if (evaluation.includes('정답')) {
+                    correctCount++;
+                }
+                
+                document.getElementById('nextBtn').style.display = 'inline-block';
+                
+            } catch (error) {
+                console.error('OpenAI API error:', error);
+                document.getElementById('evaluationText').textContent = 'API 호출 오류가 발생했습니다.';
+                document.getElementById('evaluationResult').style.display = 'block';
+                document.getElementById('nextBtn').style.display = 'inline-block';
+            }
+        }
+
+        async function callOpenAI(questionText, userText, expectedAnswer) {
+            const prompt = `
+질문: ${questionText}
+사용자의 응답: ${userText}
+정답 기준: ${expectedAnswer}
+
+'사용자의 응답'이 '정답 기준'과 의미상 일치하면 '정답', 그렇지 않으면 '오답'으로만 답변해.
+다음과 같은 경우도 '정답'으로 간주해야 한다:
+- 연도 표현이 다르더라도 같은 해를 가리키는 경우 (예: "2025년", "2025년도", "25년도"는 모두 동일)
+- 숫자의 순서가 같으면 같은 의미로 본다 (예: "6 9 7 3" == "육구칠삼" == "69 7 3")
+- '정답 기준'과 '사용자의 응답'의 띄어쓰기의 차이는 오답으로 간주하지 않는다.
+- 사용자의 응답에 포함된 "음", "어", "저기", "그"와 같은 자연스러운 추임새나 말막힘은 무시하고 의미만 비교한다.
+
+출력은 '정답' 또는 '오답'을 출력하거나, 점수가 있는 경우 점수를 출력해.`;
+
+            const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${openaiApiKey}`
+                },
+                body: JSON.stringify({
+                    model: 'gpt-4',
+                    messages: [
+                        {
+                            role: 'user',
+                            content: prompt
+                        }
+                    ],
+                    temperature: 0.0
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`OpenAI API error: ${response.status}`);
+            }
+
+            const data = await response.json();
+            return data.choices[0].message.content.trim();
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            showCurrentQuestion();
+        }
+
+        function showFinalResult() {
+            document.getElementById('testArea').style.display = 'none';
+            document.getElementById('finalResult').style.display = 'block';
+            
+            const finalScore = `${correctCount} / ${totalCount}`;
+            document.getElementById('finalScore').textContent = `Result: ${finalScore}`;
+            
+            // Same output format as Python code
+            console.log(`\nResult: ${finalScore}`);
+        }
+    </script>
+</body>
+</html>
