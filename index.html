@@ -1,259 +1,243 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>CIST Web Implementation - 자동 진행</title>
-<style>
-    * {
-        margin: 0; padding: 0; box-sizing: border-box;
-    }
-    body {
-        font-family: 'Malgun Gothic', Arial, sans-serif;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        min-height: 100vh;
-        padding: 20px;
-        color: #333;
-    }
-    .container {
-        max-width: 800px;
-        margin: 0 auto;
-        background: white;
-        border-radius: 20px;
-        box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-        overflow: hidden;
-        padding: 30px;
-    }
-    .header {
-        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-        color: white;
-        padding: 30px;
-        text-align: center;
-        border-radius: 15px 15px 0 0;
-    }
-    .header h1 {
-        font-size: 2.5em;
-        margin-bottom: 10px;
-        font-weight: 700;
-    }
-    .warning {
-        background: #fff3cd;
-        border: 1px solid #ffeaa7;
-        color: #856404;
-        padding: 15px;
-        border-radius: 8px;
-        margin-bottom: 20px;
-        font-weight: 600;
-        text-align: center;
-    }
-    .start-button {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border: none;
-        padding: 15px 40px;
-        font-size: 1.2em;
-        border-radius: 50px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        display: block;
-        margin: 20px auto;
-        font-weight: 600;
-    }
-    .start-button:hover:not(:disabled) {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-    }
-    .start-button:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-    }
-    .test-area {
-        display: none;
-        margin-top: 30px;
-        text-align: center;
-    }
-    .progress-info {
-        background: #fff3e0;
-        padding: 15px;
-        border-radius: 10px;
-        margin-bottom: 20px;
-        font-weight: 600;
-        font-size: 1.2em;
-    }
-    .question-text {
-        font-size: 1.3em;
-        color: #333;
-        margin-bottom: 30px;
-        line-height: 1.5;
-        min-height: 80px;
-    }
-    .evaluation-result {
-        background: #f1f8e9;
-        padding: 15px;
-        border-radius: 10px;
-        margin: 20px 0;
-        border-left: 4px solid #4caf50;
-        font-weight: 600;
-        font-size: 1.2em;
-    }
-    .final-result {
-        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-        color: white;
-        padding: 40px;
-        border-radius: 15px;
-        text-align: center;
-        margin-top: 40px;
-        display: none;
-    }
-    .final-score {
-        font-size: 3em;
-        font-weight: bold;
-        margin-bottom: 10px;
-    }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CIST Assessment - 또릿</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        .phone-container {
+            position: relative;
+            max-width: 100%;
+            max-height: 100vh;
+        }
+
+        .phone-image {
+            width: auto;
+            height: 100vh;
+            max-width: 100%;
+            object-fit: contain;
+        }
+
+        .call-button {
+            position: absolute;
+            bottom: 12%;
+            left: 15%;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(0, 255, 0, 0.1);
+            border: 2px solid rgba(0, 255, 0, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .call-button:hover {
+            background: rgba(0, 255, 0, 0.2);
+            border-color: rgba(0, 255, 0, 0.5);
+            transform: scale(1.1);
+        }
+
+        .call-button:active {
+            transform: scale(0.95);
+            background: rgba(0, 255, 0, 0.3);
+        }
+
+        .status-overlay {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+            z-index: 10;
+            text-align: center;
+        }
+
+        .status-overlay.show {
+            display: block;
+        }
+
+        .instructions {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .manual-instructions {
+            background: rgba(40, 40, 40, 0.95);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 15px;
+            text-align: left;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .step {
+            margin: 10px 0;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .phone-image {
+                width: 100vw;
+                height: auto;
+            }
+            
+            .call-button {
+                width: 60px;
+                height: 60px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>CIST 검사 자동 진행</h1>
-            <p>음성 재생과 녹음이 자동으로 진행됩니다.</p>
-        </div>
-        <div class="warning">
-            ⚠️ OpenAI API Key와 오디오 파일 경로를 입력해주세요.
+    <div class="phone-container">
+        <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/ddolit_call_img.jpg-DZR1jQ6TJ83wE6BMmPvtswKO3CuIMn.jpeg" alt="또릿 전화 인터페이스" class="phone-image">
+        
+        <div class="call-button" onclick="startAssessment()" title="CIST 검사 시작">
+            <div style="color: rgba(255, 255, 255, 0.8); font-size: 24px;">📞</div>
         </div>
 
-        <div class="setup-section">
-            <label for="openaiKey"><strong>OpenAI API Key:</strong></label>
-            <input type="password" id="openaiKey" placeholder="sk-..." style="width:100%; padding:10px; margin:10px 0 20px 0; font-size:1em; border-radius:6px; border:1px solid #ccc;">
-            <label for="audioBaseUrl"><strong>Audio Files Base URL:</strong></label>
-            <input type="url" id="audioBaseUrl" placeholder="https://onjing.github.io/ddolit/audio/" value="./audio/" style="width:100%; padding:10px; margin:10px 0 30px 0; font-size:1em; border-radius:6px; border:1px solid #ccc;">
+        <div id="statusOverlay" class="status-overlay">
+            <button class="close-btn" onclick="hideStatus()">×</button>
+            <div id="statusContent"></div>
         </div>
 
-        <button class="start-button" id="initBtn" onclick="initializeTest()">검사 시작</button>
-
-        <div class="test-area" id="testArea">
-            <div class="progress-info" id="progressInfo">
-                문제 <span id="currentQ">1</span> / <span id="totalQ">11</span>
-            </div>
-            <div class="question-text" id="questionText"></div>
-            <div class="evaluation-result" id="evaluationResult" style="display:none;">
-                평가 결과: <span id="evaluationText"></span>
-            </div>
-        </div>
-
-        <div class="final-result" id="finalResult">
-            <div class="final-score" id="finalScore"></div>
-            <div>최종 검사 결과</div>
+        <div class="instructions">
+            녹색 통화 버튼을 클릭하여 CIST 검사를 시작하세요
         </div>
     </div>
 
-<script>
-    // 문제 스크립트 (Python 코드와 동일)
-    const script = [
-        {
-            label: 'hello',
-            file: 'ddolit_CIST_Q_hello.wav',
-            content: '안녕하세요. 지금부터, 기억력과 사고능력을 살펴보기 위한, 질문들을 드릴거에요.',
-            hasAnswer: false
-        },
-        {
-            label: 'Q1_2',
-            file: 'ddolit_CIST_Q_Q1_2.wav',
-            content: '올해는 몇 년도인가요',
-            answer: `${new Date().getFullYear()}년`,
-            hasAnswer: true
-        },
-        {
-            label: 'Q1_3',
-            file: 'ddolit_CIST_Q_Q1_3.wav',
-            content: '지금은 몇 월인가요?',
-            answer: `${new Date().getMonth() + 1}월`,
-            hasAnswer: true
-        },
-        {
-            label: 'Q1_4',
-            file: 'ddolit_CIST_Q_Q1_4.wav',
-            content: '오늘은 며칠인가요?',
-            answer: `${new Date().getDate()}일`,
-            hasAnswer: true
-        },
-        {
-            label: 'Q2',
-            file: 'ddolit_CIST_Q_Q2.wav',
-            content: '지금 계신 곳은 어디인가요? 어디에 계신지 말씀해 주세요.',
-            answer: '집, 병원, 서울시, 경기도, 강남구 등 사람이 거주하거나 머무를 수 있는 장소',
-            hasAnswer: true
-        },
-        {
-            label: 'Q3',
-            file: 'ddolit_CIST_Q_Q3.wav',
-            content: '지금부터 외우셔야 하는 문장을 불러드릴게요. 끝까지 잘 들어주시고, 따라해주세요. 민수는 자전거를 타고 공원에 가서 열한시부터 야구를 했다',
-            answer: '민수는 자전거를 타고 공원에 가서 11시부터 야구를 했다',
-            hasAnswer: true
-        },
-        {
-            label: 'Q4_1',
-            file: 'ddolit_CIST_Q_Q4_1.wav',
-            content: '제가 불러드리는 숫자를, 그대로 따라해주세요. 육, 구, 칠, 삼',
-            answer: '6973',
-            hasAnswer: true
-        },
-        {
-            label: 'Q4_2',
-            file: 'ddolit_CIST_Q_Q4_2.wav',
-            content: '오, 칠, 이, 팔, 사',
-            answer: '57284',
-            hasAnswer: true
-        },
-        {
-            label: 'Q5',
-            file: 'ddolit_CIST_Q_Q5.wav',
-            content: '제가 불러드리는 말을, 끝에서부터, 거꾸로 따라해주세요. 금수강산',
-            answer: '산강수금',
-            hasAnswer: true
-        },
-        {
-            label: 'Q6',
-            file: 'ddolit_CIST_Q_Q6.wav',
-            content: '제가 조금 전에 외우라고 불러드렸던 문장을 다시 한번 말씀해주세요.',
-            answer: '민수는 자전거를 타고 공원에 가서 열한시부터 야구를 했다',
-            hasAnswer: true
-        },
-        {
-            label: 'Q7',
-            file: 'ddolit_CIST_Q_Q7.wav',
-            content: '지금부터 제가 그만이라고 말할 때까지 과일이나 채소를 최대한 많이 이야기해주세요.',
-            answer: '과일이나 채소를 0-8개: 0점 / 9-14개: 1점 / 15개 이상: 2점',
-            hasAnswer: true
+    <script>
+        function showInstructions() {
+            const content = `
+                <h3 style="color: #51cf66; margin-top: 0;">🎯 CIST 검사 실행 방법</h3>
+                
+                <div class="manual-instructions">
+                    <div class="step">
+                        <strong>1단계: 터미널/명령 프롬프트 열기</strong><br>
+                        • Windows: Win + R → "cmd" 입력 → Enter<br>
+                        • Mac: Cmd + Space → "터미널" 검색 → Enter<br>
+                        • Linux: Ctrl + Alt + T
+                    </div>
+                    
+                    <div class="step">
+                        <strong>2단계: Python 스크립트가 있는 폴더로 이동</strong><br>
+                        <code>cd "C:\\your\\project\\folder"</code><br>
+                        (실제 폴더 경로로 변경하세요)
+                    </div>
+                    
+                    <div class="step">
+                        <strong>3단계: Python 스크립트 실행</strong><br>
+                        <code>python cist_assessment.py</code><br>
+                        또는<br>
+                        <code>python3 cist_assessment.py</code>
+                    </div>
+                    
+                    <div class="step">
+                        <strong>필수 준비사항:</strong><br>
+                        ✅ Python 설치됨<br>
+                        ✅ 필요한 패키지 설치됨 (pip install pandas numpy matplotlib...)<br>
+                        ✅ .env 파일에 API 키 설정됨<br>
+                        ✅ 오디오 파일들이 올바른 위치에 있음<br>
+                        ✅ responses 폴더 생성됨
+                    </div>
+                    
+                    <div class="step" style="background: rgba(255, 193, 7, 0.2);">
+                        <strong>💡 팁:</strong><br>
+                        • 스크립트 파일을 더블클릭해도 실행될 수 있습니다<br>
+                        • Python 파일 연결이 설정되어 있다면 바로 실행됩니다<br>
+                        • 오류가 발생하면 터미널에서 실행하여 오류 메시지를 확인하세요
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('statusContent').innerHTML = content;
+            document.getElementById('statusOverlay').classList.add('show');
         }
-    ];
 
-    let currentQuestionIndex = 0;
-    let correctCount = 0;
-    let totalCount = 0;
-    let openaiApiKey = '';
-    let audioBaseUrl = '';
-    let recognition;
+        function hideStatus() {
+            document.getElementById('statusOverlay').classList.remove('show');
+        }
 
-    // 음성 인식 객체 초기화
-    if ('webkitSpeechRecognition' in window) {
-        recognition = new webkitSpeechRecognition();
-    } else if ('SpeechRecognition' in window) {
-        recognition = new SpeechRecognition();
-    } else {
-        recognition = null;
-    }
+        function startAssessment() {
+            // Show manual instructions
+            showInstructions();
+            
+            // Try to open the Python file directly (if file associations are set up)
+            try {
+                // Create a temporary link to the Python file
+                const link = document.createElement('a');
+                link.href = 'cist_assessment.py';
+                link.download = 'cist_assessment.py';
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } catch (e) {
+                console.log('Direct file access not available in browser');
+            }
+            
+            // Try to execute via custom protocol (if user has set it up)
+            try {
+                window.location.href = 'python://cist-assessment';
+            } catch (e) {
+                console.log('Custom protocol not available');
+            }
+        }
 
-    if (recognition) {
-        recognition.continuous = false;
-        recognition.interimResults = false;
-        recognition.lang = 'ko-KR';
-    }
+        // Keyboard shortcut (Space or Enter to start assessment)
+        document.addEventListener('keydown', (event) => {
+            if (event.code === 'Space' || event.code === 'Enter') {
+                event.preventDefault();
+                startAssessment();
+            }
+        });
 
-    async function initializeTest() {
-        openaiApiKey = document.getElementById('openaiKey').value.trim();
-        audioBaseUrl = document.getElementById('audioBaseUrl').value.trim();
-
-        if (!openaiApiKey) {
-            alert('OpenAI API Key를 입력해주세요.');
-           
+        // Click outside overlay to close
+        document.getElementById('statusOverlay').addEventListener('click', (e) => {
+            if (e.target.id === 'statusOverlay') {
+                hideStatus();
+            }
+        });
+    </script>
+</body>
+</html>
